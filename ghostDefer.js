@@ -4,7 +4,10 @@
 			onfinish:[]	
 		},
 		scripts = [],
+		independentScripts = [],
+		dependentScript = {},
 		loadedScripts = {};
+
 	function addReady(el,callback,par){
 		var fired = false,
 			ready = function(){
@@ -27,6 +30,7 @@
 		}
 			
 	}
+
 	function addEvent(name,fn){
 		if(typeof fn === "function"){
 			events[name].push(fn);
@@ -38,6 +42,7 @@
 		for(var i in events[name])
 			events[name][i]() // trigger event
 	}
+
 	function createElement(source){
 		var el;
 		if( (/.js$/).test(source) ){
@@ -57,35 +62,52 @@
 			scripts.push(p[i]);
 		return this;
 	}
-	function loadChildren(i){
-		if(scripts[i].children){
-			load(scripts[i]);
-		}
-	}
-	function load(script){ // parameter is a script
-		for(var i in script){
-			if(!script[i].d){ // if script is independent
-				var source = script[i].s || script[i]; // check if script is object and get its source url
-				var el = createElement(source);
-				addReady(el,function(index){
-					if(script[index].cb)
-						script[index].cb(); // trigger callback function
-					loadChildren(index);
-				},i);
-				d.querySelector('head').appendChild(el);
 
-				if(script.name)
-					loadedScripts[name] = true; // register the loaded script by its name
+	function  load(){
+		for(var i in scripts){
+			if(!scripts[i].d){ // if script is independent
+				loadScript(scripts[i]);
+				
 			}
 		}
+	}
+
+	function loadDepend(name){
+		for(var i in scripts){
+
+			if(scripts[i].d){
+
+				if(scripts[i].d == name){
+					if(scripts[i].f)
+						scripts[i].f();
+					else
+					loadScript(script[i]);
+				}
+			}
+		}
+		
+	}
+
+	function loadScript(script){
+		var source = scripts[i].s || scripts[i]; // check if scripts is object or string
+				var el = createElement(source);
+
+				addReady(el,function(index){
+					if(scripts[index].cb)
+						scripts[index].cb();
+					if(scripts[index].name)
+						loadDependent(scripts[index].name);
+				},i);
+
+		d.querySelector('head').appendChild(el);
 
 	}
 	function run(){
 		triggerEvent('onload'); //trigger event onload before scripts are loaded
-		load(scripts);
+		
 		triggerEvent('onfinish');
 	}
-	
+	 
 	//contructor execute
 	addReady(d,run); //when document is ready execute function run
 
@@ -95,3 +117,18 @@
 	};
 
 })(window,document,'ghostDefer');
+
+function separateScript(){
+
+	for(var i in scripts){
+		if(scripts[i].d){
+
+			if(!dependentScript[scripts[i].d]) 
+				dependentScript[scripts[i].d] = []; // if dependentScript name if not yet register
+
+			dependentScript[scripts[i].d].push(scripts[i]);
+			
+		}else
+			independentScripts.push(scripts[i])
+	}
+}
