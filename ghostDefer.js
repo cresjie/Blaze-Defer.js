@@ -14,6 +14,7 @@
 				if(!fired){
 					fired =true;
 					callback(par);
+					
 				}
 			},
 			readyState = function(){
@@ -23,7 +24,7 @@
 			
 		if(el.addEventListener){
 			el.addEventListener('DOMContentLoaded',ready);
-			el.addEventListener('onload',ready);
+			el.addEventListener('load',ready);
 		}else{
 			el.attachEvent('onreadystatechange',readyState);
 			el.attachEvent('onload',ready);	
@@ -63,48 +64,57 @@
 		return this;
 	}
 
-	function  load(){
-		for(var i in scripts){
-			if(!scripts[i].d){ // if script is independent
-				loadScript(scripts[i]);
+	function  load(Scripts){
+		for(var i in Scripts){
+			if(!Scripts[i].d){ // if script is independent
+				loadScript(Scripts[i]);
 				
 			}
 		}
 	}
 
-	function loadDepend(name){
+	function loadDependent(name){
 		for(var i in scripts){
-
+			
 			if(scripts[i].d){
 
 				if(scripts[i].d == name){
-					if(scripts[i].f)
+					if(scripts[i].f){
 						scripts[i].f();
+					}
 					else
-					loadScript(script[i]);
+						loadScript(scripts[i]);
 				}
 			}
 		}
 		
 	}
-
+	var c  =0;
 	function loadScript(script){
-		var source = scripts[i].s || scripts[i]; // check if scripts is object or string
+		var source = script.s || script; // check if scripts is object or string
 				var el = createElement(source);
+				
+				
+				addReady(el,function(Script){
 
-				addReady(el,function(index){
-					if(scripts[index].cb)
-						scripts[index].cb();
-					if(scripts[index].name)
-						loadDependent(scripts[index].name);
-				},i);
+							
+					if(Script.script.cb)
+						Script.script.cb();
+					if(Script.script.name)
+						loadDependent(Script.script.name);
+					if(Script.script.children){
+						load(Script.script.children)
+					}
+
+				},{script:script,el:el});
+				
 
 		d.querySelector('head').appendChild(el);
 
 	}
 	function run(){
 		triggerEvent('onload'); //trigger event onload before scripts are loaded
-		
+		load(scripts);
 		triggerEvent('onfinish');
 	}
 	 
@@ -118,17 +128,4 @@
 
 })(window,document,'ghostDefer');
 
-function separateScript(){
 
-	for(var i in scripts){
-		if(scripts[i].d){
-
-			if(!dependentScript[scripts[i].d]) 
-				dependentScript[scripts[i].d] = []; // if dependentScript name if not yet register
-
-			dependentScript[scripts[i].d].push(scripts[i]);
-			
-		}else
-			independentScripts.push(scripts[i])
-	}
-}

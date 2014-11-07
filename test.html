@@ -1,0 +1,35 @@
+<html>
+<head>
+
+<script src="ghostDefer.js" type="text/javascript"></script>
+<script>
+ghostDefer.addScripts([
+	{
+		s:'http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js',
+		name:'jquery',
+		cb:function(){console.log('cb1')}
+	},
+	{
+		d:'jquery',
+		s:'../LAB.min.js',
+		children:['aaaaaaaaa.js',{
+			s:'http://mymusicrocks.url.ph/js/SMPlaylist.js',
+			name:'sm',
+			children:['bbbb.js','1111.js']
+		}],
+		cb:function(){console.log('cb2')}
+	}, 'a11111.js',
+	{
+		d:'jquery',
+		s:'111111.js'
+
+	},
+	{
+		d:'sm',f:function(){console.log($.SMPlaylist)}
+	}
+	]);
+</script>
+</head>
+
+
+</html>
