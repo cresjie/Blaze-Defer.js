@@ -1,4 +1,3 @@
-// JavaScript Document
 (function(w,d,fn){
 	var events = {
 			onload:[],
@@ -58,19 +57,31 @@
 	}
 	function loadChildren(i){
 		if(scripts[i].children){
-
+			load(scripts[i]);
 		}
+	}
+	function load(par){ // parameter is a script
+		for(var i in par){
+			if(!par[i].d){ // if script is independent
+				var source = par[i].s || par[i]; // check if script is object and get its source url
+				var el = createElement(source);
+				addReady(el,function(par_i){
+					if(par[par_i].cb)
+						par[par_i].cb(); // trigger callback function
+					loadChildren(par_i);
+				},i);
+				d.querySelector('head').appendChild(el);
+			}
+		}
+
 	}
 	function run(){
 		triggerEvent('onload'); //trigger event onload before scripts are loaded
-
-		for(var i in scripts){
-			if(scripts[i].d){
-				var source = scripts[i].s || scripts[i]; // check if script is object and get its source url
-				var el = createElement(source);
-				addReady(el,loadChildren,i);
-			}
-		}
+		load(scripts);
+		
 	}
 	
+	//contructor execute
+	addReady(d,run);
+
 })(window,document,'ghostDefer');
