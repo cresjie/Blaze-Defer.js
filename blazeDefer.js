@@ -126,6 +126,6 @@
 		addScripts:addScripts
 	};
 
-})(window,document,'ghostDefer');
+})(window,document,'blazeDefer');
 
 
